@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>IE590 Data Visualization HW#2(Quanzheng Long)</title>
+	<!--outside framwork-->
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta charset="utf-8">
+	<!-- CSS -->
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+	<!-- js -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+</head>
+<body>
+
+<div id="container" style="margin: 0 auto; width: 960px;">
+	<table id="hw2_table" class="table table-hover table-striped" >
+		<tr>
+			<th class="first">Name</th>
+			<th>GPA</th>
+			<th>GRE_V</th>
+			<th>GRE_Q</th>
+			<th>Essay</th>
+			<th>Recom</th>
+		</tr>
+
+	</table>
+</div>
+</body>
+<script type="text/javascript">
+$(document).ready(function(){
+  $.getJSON("https://hivelab.org/static/students.json", function(json){
+    var table = $('#hw2_table');
+
+    $.each(json, function(idx, student){
+      table.append("<tr><td>" + student.Name +"</td><td>" + student.GPA +"</td><td>" + student.GRE_V +"</td><td>" +  student.GRE_Q + "</td><td>" + student.Essay + "</td><td>" + student.Recom + "</td></tr>");
+    });
+  });
+});
+</script>
+</html>
