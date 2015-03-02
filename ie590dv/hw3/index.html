@@ -1,0 +1,203 @@
+
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+
+<style>
+body {
+  font: 20px Microsoft YaHei;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.dot {
+  stroke: #000;
+}
+
+.tooltip {
+  position: absolute;
+  width: 200px;
+  height: 28px;
+  pointer-events: none;
+}
+</style>
+<body>
+  <div id="svg1" align=center ></div>
+  <div id="story1" align=center ><p style="width:800px;text-align: left;">Here we found that most contries in the high latitude have a higher efficiency(scores / instructional hours) than the countries in the low latitude. Maybe it's because when weather get colder, the study efficiency will get higher(because it's sometimes harder to go to school in the winter like in Purdue)[Latitude data from Wikipedia]</p></div>
+  <div id="svg2" align=center ></div>
+
+  <div id="story2" align=center ><p style="width:800px;text-align: left;">Here we found that most contries with higher GDP per Capita will mostly have a higher education efficiency(scores / instructional hours)[Latitude data from Wikipedia]</p></div>
+
+<script src="http://d3js.org/d3.v3.min.js"></script>
+
+<script>
+var margin = {top: 20, right: 20, bottom: 30, left: 40},
+    width = 860 - margin.left - margin.right,
+    height = 600 - margin.top - margin.bottom;
+
+/* 
+ * value accessor - returns the value to encode for a given data object.
+ * scale - maps value to a visual display encoding, such as a pixel position.
+ * map function - maps from data value to display value
+ * axis - sets up axis
+ */ 
+
+// setup x 
+var xValue = function(d) { return d.latitude;}, // data -> value
+    xScale = d3.scale.linear().range([0, width]), // value -> display
+    xMap = function(d) { return xScale(xValue(d));}, // data -> display
+    xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+
+var x2Value = function(d) { return d.gpd_percap;}, // data -> value
+    x2Scale = d3.scale.linear().range([0, width]), // value -> display
+    x2Map = function(d) { return x2Scale(x2Value(d));}, // data -> display
+    x2Axis = d3.svg.axis().scale(x2Scale).orient("bottom");
+
+// setup y
+var yValue = function(d) { return d["efficiency"];}, // data -> value
+    yScale = d3.scale.linear().range([height, 0]), // value -> display
+    yMap = function(d) { return yScale(yValue(d));}, // data -> display
+    yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+// setup fill color
+var cValue = function(d) { return d.country;},
+    color = d3.scale.category20();
+
+// add the graph canvas to the body of the webpage
+var svg = d3.select("#svg1").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+var svg2 = d3.select("#svg2").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+// add the tooltip area to the webpage
+var tooltip = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+
+// load data
+d3.csv("effcny0301.csv", function(error, data) {
+
+  // change string (from CSV) into number format
+  data.forEach(function(d) {
+    d.latitude = +d.latitude;
+    d.gpd_percap = +d.gpd_percap;
+    d.efficiency = +d.efficiency;
+  });
+
+  // don't want dots overlapping axis, so add in buffer to data domain
+  xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
+  x2Scale.domain([d3.min(data, x2Value)-1, d3.max(data, x2Value)+1]);
+  //yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
+
+  // x-axis
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis)
+    .append("text")
+      .attr("class", "label")
+      .attr("x", width)
+      .attr("y", -6)
+      .style("text-anchor", "end")
+      .text("latitude");
+
+  svg2.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(x2Axis)
+    .append("text")
+      .attr("class", "label")
+      .attr("x", width)
+      .attr("y", -6)
+      .style("text-anchor", "end")
+      .text("GDP-PerCap");
+
+  // y-axis
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("class", "label")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("efficiency(scores / instructional hours)");
+
+  // y-axis
+  svg2.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("class", "label")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("efficiency(scores / instructional hours)");
+
+  // draw dots
+  svg.selectAll(".dot")
+      .data(data)
+    .enter().append("circle")
+      .attr("class", "dot")
+      .attr("r", 8.5)
+      .attr("cx", xMap)
+      .attr("cy", yMap)
+      .style("fill", function(d) { return color(cValue(d));}) 
+      .on("mouseover", function(d) {
+          tooltip.transition()
+               .duration(200)
+               .style("opacity", .9);
+          tooltip.html(d["country"] + "<br/> (" + xValue(d) 
+          + ", " + yValue(d) + ")")
+               .style("left", (d3.event.pageX + 5) + "px")
+               .style("top", (d3.event.pageY - 28) + "px");
+      })
+      .on("mouseout", function(d) {
+          tooltip.transition()
+               .duration(500)
+               .style("opacity", 0);
+      });
+
+  svg2.selectAll(".dot")
+      .data(data)
+    .enter().append("circle")
+      .attr("class", "dot")
+      //.attr("r", function(d){ return x2Value(d)/67619 * 20 ;} )
+      .attr("r", 8 )
+      .attr("cx", x2Map)
+      .attr("cy", yMap)
+      .style("fill", function(d) { return color(cValue(d));}) 
+      .on("mouseover", function(d) {
+          tooltip.transition()
+               .duration(200)
+               .style("opacity", .9);
+          tooltip.html(d["country"] + "<br/> (" + x2Value(d) 
+          + ", " + yValue(d) + ")")
+               .style("left", (d3.event.pageX + 5) + "px")
+               .style("top", (d3.event.pageY - 28) + "px");
+      })
+      .on("mouseout", function(d) {
+          tooltip.transition()
+               .duration(500)
+               .style("opacity", 0);
+      });
+
+});
+
+</script>
+</body>
+</html>
