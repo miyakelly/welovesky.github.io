@@ -53,7 +53,7 @@ var xValue = function(d) { return d.latitude;}, // data -> value
     xMap = function(d) { return xScale(xValue(d));}, // data -> display
     xAxis = d3.svg.axis().scale(xScale).orient("bottom");
 
-var x2Value = function(d) { return d.gpd_percap;}, // data -> value
+var x2Value = function(d) { return d.gpd_percap ;}, // data -> value
     x2Scale = d3.scale.linear().range([0, width]), // value -> display
     x2Map = function(d) { return x2Scale(x2Value(d));}, // data -> display
     x2Axis = d3.svg.axis().scale(x2Scale).orient("bottom");
@@ -92,7 +92,7 @@ d3.csv("effcny0301.csv", function(error, data) {
   // change string (from CSV) into number format
   data.forEach(function(d) {
     d.latitude = +d.latitude;
-    d.gpd_percap = +d.gpd_percap;
+    d.gpd_percap = (+d.gpd_percap)/1000;
     d.efficiency = +d.efficiency;
   });
 
@@ -122,7 +122,7 @@ d3.csv("effcny0301.csv", function(error, data) {
       .attr("x", width)
       .attr("y", -6)
       .style("text-anchor", "end")
-      .text("GDP-PerCap");
+      .text("GDP(K$/PerCap)");
 
   // y-axis
   svg.append("g")
