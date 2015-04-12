@@ -26,6 +26,8 @@ var svg = d3.select("#vis").append("svg")
     .attr("width", w)
     .attr("height", h);
 
+// var svg = d3.select("#vissvg");
+
 var background = svg.append("g"),
     vis = svg.append("g")
     .attr("transform", "translate(" + [w >> 1, h >> 1] + ")");
@@ -58,6 +60,9 @@ var stopWords = /^(i|me|my|myself|we|us|our|ours|ourselves|you|your|yours|yourse
     matchTwitter = /^https?:\/\/([^\.]*\.)?twitter\.com/;
 
 hashchange("//www.jasondavies.com/wordcloud/about/");
+
+load(d3.select("#text").property("value"));
+      d3.event.preventDefault();
 
 function parseHTML(d) {
   parseText(d.replace(htmlTags, " ").replace(/&#(x?)([\dA-Fa-f]{1,4});/g, function(d, hex, m) {
