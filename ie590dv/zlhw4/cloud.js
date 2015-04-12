@@ -62,7 +62,7 @@ var stopWords = /^(i|me|my|myself|we|us|our|ours|ourselves|you|your|yours|yourse
 hashchange("//www.jasondavies.com/wordcloud/about/");
 
 load(d3.select("#text").property("value"));
-      d3.event.preventDefault();
+      // d3.event.preventDefault();
 
 function parseHTML(d) {
   parseText(d.replace(htmlTags, " ").replace(/&#(x?)([\dA-Fa-f]{1,4});/g, function(d, hex, m) {
