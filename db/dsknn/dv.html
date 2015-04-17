@@ -1,0 +1,118 @@
+
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+
+<!-- Example based on http://bl.ocks.org/mbostock/3887118 -->
+<!-- Tooltip example from http://www.d3noob.org/2013/01/adding-tooltips-to-d3js-graph.html -->
+
+<style>
+body {
+  font: 11px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.dot {
+  stroke: #000;
+}
+
+</style>
+<body>
+<script src="d3.v3.min.js"></script>
+<script src="myvar.js"></script>
+<script src="jquery-1.11.2.min.js"></script>
+
+<script>
+
+$(function() {
+    
+drw(0,50,"AvgSave#",function(d) { return (d.BST-d.GSS)/d.S;});
+drw(0,1.0,"Save%",function(d) { return (d.BST-d.GSS)/d.GSS;});
+
+drw(10,130,"RealSucc#",function(d) { return (1000-d.MF)/10;});
+drw(10,130,"Succ#",function(d) { return d.S/10;});
+
+// drw(0,50000,"Save#",function(d) { return d.BST-d.GSS;});
+// drw(0,50000,"Save#",function(d) { return d.BST-d.GSS;});
+
+function drw(ymin,ymax,xtext,ydfn){
+// setup x 
+var xScale = d3.scale.linear().range([0, 550]), // value -> display
+    xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+
+// setup y
+var yScale = d3.scale.linear().range([550, 0]), // value -> display
+    yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+  xScale.domain([0, 100]);
+  yScale.domain([ymin, ymax]);
+
+var svg_all = d3.select("body").append("svg")
+      .attr("width", 8800)
+      .attr("height", 550 );
+var svgs = [];
+
+var color = d3.scale.category10();
+
+// add the graph canvas to the body of the webpage
+for(var i=0; i<10; i++){
+
+var x = i*880+160;
+ svgs[i] = svg_all.append("g")
+      .attr("transform", "translate(" + x + "," + 0 + ")");
+
+  K = i*2+1;
+  // x-axis
+  svgs[i].append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate("+60+"," + 30 + ")")
+      .call(xAxis)
+    .append("text")
+      .attr("class", "label")
+      .attr("x", 40)
+      .attr("y", -6)
+      .style("text-anchor", "end")
+      .text(xtext+"/Tshd%(K="+K+")");
+
+  // y-axis
+  svgs[i].append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("class", "label")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em");
+}
+
+
+// load data
+for(var j=0;j<10;j++){
+  var data = mydata[j];
+  var svg = svgs[j];
+
+  // draw dots
+  svg.selectAll(".dot")
+      .data(data)
+    .enter().append("circle")
+      .attr("class", "dot")
+      .attr("r", 8.5)
+      .attr("cx", function(d) { return xScale(d.T);} )
+      .attr("cy", function(d){ return yScale(ydfn(d));} )
+      .style("fill", function(d) { return color(d.K);}) ;
+
+}
+
+}//end of drw function
+
+});
+
+</script>
+</body>
+</html>
