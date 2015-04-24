@@ -31,6 +31,10 @@ $( document ).ready(function() {
 			d3.select("thead").selectAll("th:nth-child("+real_row+")").style("background-color","#CCCC00")
 
 			//sort data
+			var lastClicked;
+			if(clicked_row>-1){
+				lastClicked = jsonData[clicked_row]['ItemNo'];
+			}
 			if(col==sortedCol){
 				jsonData.sort(function(a,b){
 					return mySort(a[col], b[col]); 
@@ -44,8 +48,17 @@ $( document ).ready(function() {
 			}
 
 			fillTable();				
-			clicked_row = -1;
 			bindEvents();
+			if(clicked_row>-1){
+				//find the last click
+				for(i=0;i<jsonData.length;i++){
+					if(jsonData[i]['ItemNo'] === lastClicked){
+						clicked_row = i;
+						break;
+					}
+				}
+				colorizeRow(clicked_row,"green")
+			}
 		});
 
 
@@ -74,8 +87,7 @@ $( document ).ready(function() {
 			}else{
 				color = "yellow";
 			}
-			var real_row = row+1;
-			d3.select("tbody").selectAll("tr:nth-child("+real_row+")").style("background-color",color)
+			colorizeRow(row,color)
 		}).on("mouseout",function(v,column,row){
 			var color;
 			if(row == clicked_row){
@@ -83,17 +95,19 @@ $( document ).ready(function() {
 			}else{
 				color = "";
 			}
-			var real_row = row+1;
-			d3.select("tbody").selectAll("tr:nth-child("+real_row+")").style("background-color",color)
+			colorizeRow(row,color)
 		}).on("click",function(v,column,row){
 			var color;
-			var real_row = clicked_row+1;
-			d3.select("tbody").selectAll("tr:nth-child("+real_row+")").style("background-color","")
+			colorizeRow(clicked_row,"")
 			clicked_row = row;
-			real_row = row+1;
-			d3.select("tbody").selectAll("tr:nth-child("+real_row+")").style("background-color","green")
+			colorizeRow(row,"green")
 		});
 
+	}
+
+	function colorizeRow(row,color){
+		real_row = row+1;
+		d3.select("tbody").selectAll("tr:nth-child("+real_row+")").style("background-color",color)
 	}
 
 	});// end load json
