@@ -1,0 +1,81 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title> ie590 exam2 3.1</title>
+  
+  <script type='text/javascript' src='d3.v3.min.js'></script>
+  <script type='text/javascript' src='jquery.js'></script>
+
+<script type='text/javascript'>
+
+$( document ).ready(function() {
+
+    var out2 = d3.json("exam2.json", function(error, jsonData) {
+
+	// create the table header
+	var thead = d3.select("thead").selectAll("th")
+		.data(d3.keys(jsonData[0]))
+		.enter().append("th").text(function(d){return d;})
+		.style("background-color","lightgrey")
+		.style("width","68px")
+		
+	// fill the table	
+	// create rows
+	var tr = d3.select("tbody").selectAll("tr").data(jsonData);	
+	tr.enter().append("tr");
+
+	// create cells
+	var td = tr.selectAll("td").data(function(d){return d3.values(d);});	
+	td.enter().append("td")
+		.text(function(d) {return d;});
+
+	clicked_row = -1;
+	td.on("mouseover",function(v,column,row){
+		var color;
+		if(row == clicked_row){
+			color = "darkgreen";
+		}else{
+			color = "yellow";
+		}
+		var real_row = row+1;
+		d3.select("tbody").selectAll("tr:nth-child("+real_row+")").style("background-color",color)
+	}).on("mouseout",function(v,column,row){
+		var color;
+		if(row == clicked_row){
+			color = "green";
+		}else{
+			color = "";
+		}
+		var real_row = row+1;
+		d3.select("tbody").selectAll("tr:nth-child("+real_row+")").style("background-color",color)
+	}).on("click",function(v,column,row){
+		var color;
+		var real_row = clicked_row+1;
+		d3.select("tbody").selectAll("tr:nth-child("+real_row+")").style("background-color","")
+		clicked_row = row;
+		real_row = row+1;
+		d3.select("tbody").selectAll("tr:nth-child("+real_row+")").style("background-color","green")
+	});
+
+	});// end load json
+
+	
+}); //end document.ready
+
+</script>
+
+
+</head>
+<body>
+  <table style="text-align: right;">
+    <thead></thead>
+    <tbody></tbody>
+</table>
+  
+</body>
+
+
+</html>
+
