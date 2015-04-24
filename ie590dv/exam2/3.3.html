@@ -14,11 +14,25 @@ $( document ).ready(function() {
 
     var out2 = d3.json("exam2.json", function(error, jsonData) {
 
-    sortedCol = null;
-    lastColNum = -1;
+    sortedCol = null;//for sorting col
+    lastColNum = -1; //for sorting col
+    clicked_row = -1;//for hilight row
+
+    //initialize the key data structure!!!
+    var keys = d3.keys(jsonData[0]);
+    var orderArr = [];
+    for(i=0; i< keys.length; i++){
+    	for(j=0; j<jsonData.length; j++){
+    		if(typeof orderArr[i] === 'undefined'){
+    			orderArr[i] = [];
+    		}
+    		orderArr[i][j] = j;//this store the original position of each cell!!!
+    	}
+    }
+
 	// create the table header
 	var thead = d3.select("thead").selectAll("th")
-		.data(d3.keys(jsonData[0]))
+		.data(keys)
 		.enter().append("th").text(function(d){return d;})
 		.style("background-color","lightgrey")
 		.style("width","68px")
@@ -30,8 +44,12 @@ $( document ).ready(function() {
 			var real_row = lastColNum+1
 			d3.select("thead").selectAll("th:nth-child("+real_row+")").style("background-color","#CCCC00")
 
-			//sort data
+			//prepare sort data
 			jsonData2 = $.extend(true, [], jsonData);
+			for(i=0; i< jsonData2.length; i++){
+				jsonData2[i].sortNum = orderArr[colNum][i];
+			}
+			//sort data
 			if(col==sortedCol){
 				jsonData2.sort(function(a,b){
 					return mySort(a[col], b[col]); 
@@ -43,19 +61,25 @@ $( document ).ready(function() {
 				});
 				sortedCol = col;
 			}
-			//copy to jsonData
+			//update jsonData
 			for(i=0; i<jsonData.length; i++){
 				jsonData[i][col] = jsonData2[i][col]
 			}
+			//udpate orderArr
+			for(i=0; i< jsonData2.length; i++){
+				orderArr[colNum][i] = jsonData2[i].sortNum;
+			}
 
 			fillTable();				
-			clicked_row = -1;
 			bindEvents();
+			//restore the color of clicked row
+			if(clicked_row>-1){
+				colorizeRow(clicked_row,"green")
+			}
 		});
 
 
 	fillTable();	
-	clicked_row = -1;
 	bindEvents();
 
 	// fill the table
@@ -74,31 +98,45 @@ $( document ).ready(function() {
 	function bindEvents(){
 		mytd.on("mouseover",function(v,column,row){
 			var color;
+			
+			var row = orderArr[column][row];
 			if(row == clicked_row){
 				color = "darkgreen";
 			}else{
 				color = "yellow";
 			}
-			var real_row = row+1;
-			d3.select("tbody").selectAll("tr:nth-child("+real_row+")").style("background-color",color)
+			colorizeRow(row,color);
 		}).on("mouseout",function(v,column,row){
 			var color;
+			
+			var row = orderArr[column][row];
 			if(row == clicked_row){
 				color = "green";
 			}else{
 				color = "";
 			}
-			var real_row = row+1;
-			d3.select("tbody").selectAll("tr:nth-child("+real_row+")").style("background-color",color)
+			colorizeRow(row,color);
 		}).on("click",function(v,column,row){
-			var color;
-			var real_row = clicked_row+1;
-			d3.select("tbody").selectAll("tr:nth-child("+real_row+")").style("background-color","")
-			clicked_row = row;
-			real_row = row+1;
-			d3.select("tbody").selectAll("tr:nth-child("+real_row+")").style("background-color","green")
-		});
+			colorizeRow(clicked_row,"");
 
+			var row = orderArr[column][row];
+			colorizeRow(row,"green");
+			clicked_row = row;
+		});
+	}
+
+	function colorizeRow(row,color){
+		for(i=0;i<jsonData.length;i++){
+			for(j=0;j<keys.length;j++){
+				if(orderArr[j][i] == row){
+					var real_row = i+1;
+					var real_col = j+1;
+					d3.select("tbody").selectAll("tr:nth-child("+real_row+")")
+					.selectAll("td:nth-child("+real_col+")")
+					.style("background-color",color)
+				}
+			}
+		}
 	}
 
 	});// end load json
